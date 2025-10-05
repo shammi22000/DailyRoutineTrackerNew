@@ -4,82 +4,69 @@ Daily routine tracker is a smartphone software that allows users to create, trac
 
 The App is aimed at busy people, students, and professionals who require an easy way to organize their schedules and track the progress of their tasks. This plan describes the aim, primary features, process flow, and contains basic mockups and wireframes to show how the app should act and look. 
 
+**This mobile application is built using the following technologies**
 
-React Native
+**React Native**
 
-Framework for building cross-platform mobile apps (iOS & Android) using JavaScript and React.
+  Framework for building cross-platform mobile apps 
 
-Allows you to use one codebase to develop for both platforms.
+**React Navigation**
 
-Provides native components for smooth performance.
+  Used for screen navigation between pages like Login, Signup, and Home.
 
-React Navigation
+**AsyncStorage (or SecureStore)**
 
-Used for screen navigation between pages like Login, Signup, and Home.
+  Used for local storage of user data, such as login tokens or preferences, on the device.
 
-Handles stack navigation (screen transitions) and tab or drawer navigation if needed.
 
-Expo (Optional)
+**Fetch API (or Axios)**
 
-A toolkit that simplifies running, testing, and building React Native apps.
+  Used to make API requests to backend services for login, signup, or tracking data.
 
-Handles native dependencies and gives instant preview on real devices.
 
-AsyncStorage (or SecureStore)
+**JavaScript** 
 
-Used for local storage of user data, such as login tokens or preferences, on the device.
+  The main programming language for app logic, validation, and API communication.
 
-Helps maintain sessions without re-login every time.
 
-Fetch API (or Axios)
 
-Used to make API requests to backend services for login, signup, or tracking data.
+**StyleSheet (React Native)**
 
-Fetches and sends JSON data to the server.
+  Used for styling the app UI — defines colors, spacing, typography, and layout.
 
-JavaScript (ES6)
 
-The main programming language for app logic, validation, and API communication.
-
-Supports modern syntax (arrow functions, async/await, etc.) for clean, readable code.
-
-StyleSheet (React Native)
-
-Used for styling the app UI — defines colors, spacing, typography, and layout.
-
-Keeps styles consistent and modular across screens.
 
 
 **Key features**
 
 **Login module** 
 
-o	User registration and login
+      User registration and login
 
-o	View and update user profile
+      View and update user profile
 
 
 **Daily Activity Tracker module**
 
-o	Create activities (title, duration, description etc …….)
+    Create activities (title, duration, description etc …….)
 
-o	Set Activity status (completed, progress, overdue)
+    Set Activity status (completed, progress, overdue)
 
-o	View all daily activities in an organized list
+    View all daily activities in an organized list
 
-o	Edit existing activity details such as name, time, or duration.
+    Edit existing activity details such as name, time, or duration.
 
-o	Check-off completion 
+    Check-off completion 
 
-o	Display activity detail daily, weekly based on the requirement
+    Display activity detail daily, weekly based on the requirement
 
 
 **Dashboard**
 
-o	Today’s summary: use charts to display the summery graphically
+    Today’s summary: use charts to display the summery graphically
 
-o	Weekly summery of the activity status 
+    Weekly summery of the activity status 
 
 **Basic settings**
 
-o	notifications for upcoming activities before a certain time
+    notifications for upcoming activities before a certain time
