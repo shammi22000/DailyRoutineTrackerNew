@@ -1,20 +1,56 @@
+import React, { useState } from 'react';
+import RegistrationScreen from './components/RegistrationScreen';
+import LoginScreen from './components/LoginScreen';
+import HomeScreen from './components/HomeScreen';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  ScrollView,
+} from 'react-native';
 
 export default function App() {
+  const [showRegister, setShowRegister] = useState(false);
+  const [showHome, setShowHome] = useState(false);
+  
+  const [userEmail, setUserEmail] = useState('');
+
+  function handleLogin(email, password) {
+    const validEmail = 'test@gmail.com';
+    const validPassword = 'admin123';
+    if (!email || !password) {
+      Alert.alert('Missing fields', 'Please enter email and password');
+      return;
+    }
+    if (email === validEmail && password === validPassword) {
+      setUserEmail(email);
+      setShowHome(true);
+    } else {
+      Alert.alert('Login Failed', 'Invalid email or password');
+    }
+  }
+
+  if (showRegister) {
+      return <RegistrationScreen onBack={() => setShowRegister(false)} />;
+    }
+    
+  if (showHome) {
+    return <HomeScreen email={userEmail} onHomePress={() => setShowHomeDetails(true)} />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <LoginScreen
+      onLogin={handleLogin}
+      onShowRegister={() => setShowRegister(true)}
+    />
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
