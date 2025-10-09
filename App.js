@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import RegistrationScreen from './components/RegistrationScreen';
 import LoginScreen from './components/LoginScreen';
 import HomeScreen from './components/HomeScreen';
+import HomeDetailsScreen from './components/HomeDetailsScreen';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -20,6 +21,7 @@ import {
 export default function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [showHome, setShowHome] = useState(false);
+  const [showHomeDetails, setShowHomeDetails] = useState(false);
   
   const [userEmail, setUserEmail] = useState('');
 
