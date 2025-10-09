@@ -3,6 +3,8 @@ import RegistrationScreen from './components/RegistrationScreen';
 import LoginScreen from './components/LoginScreen';
 import HomeScreen from './components/HomeScreen';
 import HomeDetailsScreen from './components/HomeDetailsScreen';
+import AddActivityScreen from './components/AddActivityScreen';
+
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -22,6 +24,7 @@ export default function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [showHome, setShowHome] = useState(false);
   const [showHomeDetails, setShowHomeDetails] = useState(false);
+  const [showAddActivity, setShowAddActivity] = useState(false);
   
   const [userEmail, setUserEmail] = useState('');
 
@@ -42,6 +45,21 @@ export default function App() {
 
   if (showRegister) {
       return <RegistrationScreen onBack={() => setShowRegister(false)} />;
+    }
+
+  if (showAddActivity) {
+      return <AddActivityScreen onBack={() => setShowAddActivity(false)} />;
+    }
+  
+    if (showHomeDetails) {
+      const name = userEmail.split('@')[0].toUpperCase();
+      return (
+        <HomeDetailsScreen
+          name={name}
+          onBack={() => setShowHomeDetails(false)}
+          onAddActivity={() => setShowAddActivity(true)}
+        />
+      );
     }
     
   if (showHome) {
