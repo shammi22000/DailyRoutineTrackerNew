@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "DailyRoutineTracker",
-    "slug": "DailyRoutineTracker",
+    "name": "daily-routing-tracker-mobile",
+    "slug": "daily-routing-tracker-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,17 +13,27 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.dailyroutingtrackermobile"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.dailyroutingtrackermobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-sqlite"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e5a60378-64a7-446c-b9d9-b73bda3b7e7b"
+      }
     }
   }
 }
