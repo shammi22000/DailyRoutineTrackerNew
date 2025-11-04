@@ -10,6 +10,7 @@ import {
   FlatList,
   ScrollView,
   Dimensions,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -39,6 +40,8 @@ export default function HomeScreen({ route }) {
   const [monthLabel, setMonthLabel] = useState("");
   const [greeting, setGreeting] = useState("");
   const [showTodayButton, setShowTodayButton] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [activityToDelete, setActivityToDelete] = useState(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef(null);
 
@@ -143,17 +146,22 @@ export default function HomeScreen({ route }) {
   };
 
   const handleDelete = async (item) => {
-    Alert.alert("Delete", `Remove "${item.name}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          await deleteActivity(item.id);
-          await loadActivities();
-        },
-      },
-    ]);
+    setActivityToDelete(item);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    if (activityToDelete) {
+      await deleteActivity(activityToDelete.id);
+      await loadActivities();
+      setDeleteModalVisible(false);
+      setActivityToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteModalVisible(false);
+    setActivityToDelete(null);
   };
 
   // ✅ Scroll to today & center visually
@@ -427,6 +435,51 @@ export default function HomeScreen({ route }) {
           ))
         )}
       </ScrollView>
+
+      {/* Modern Delete Confirmation Modal */}
+      <Modal
+        visible={deleteModalVisible}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContainer, { backgroundColor: colors.card }]}>
+            <View style={styles.modalIconContainer}>
+              <View style={styles.trashIconCircle}>
+                <Ionicons name="trash" size={32} color="#FF3B30" />
+              </View>
+            </View>
+            
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              Delete Activity
+            </Text>
+            
+            <Text style={[styles.modalMessage, { color: colors.subtext }]}>
+              Are you sure you want to delete "{activityToDelete?.name}"? 
+            </Text>
+
+            <View style={styles.modalButtonsContainer}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={cancelDelete}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.deleteButton]}
+                onPress={confirmDelete}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="trash-outline" size={18} color="#fff" />
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -522,4 +575,83 @@ const styles = StyleSheet.create({
   emptyState: { alignItems: "center", marginTop: 20 },
   emptyImage: { width: 150, height: 150, opacity: 0.7, marginBottom: 15 },
   emptyText: { textAlign: "center", fontSize: 16 },
+  // Modern Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    width: '100%',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalIconContainer: {
+    marginBottom: 16,
+  },
+  trashIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 59, 48, 0.2)',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  modalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    gap: 8,
+  },
+  cancelButton: {
+    backgroundColor: 'rgba(120, 120, 128, 0.08)',
+  },
+  deleteButton: {
+    backgroundColor: '#FF3B30',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#007AFF',
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
 });
