@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Platform,
   Animated,
+  Modal,
 } from 'react-native';
 import { Video } from 'expo-av';
 import { BlurView } from 'expo-blur';
@@ -37,7 +38,20 @@ export default function RegisterScreen({ navigation }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [strengthLabel, setStrengthLabel] = useState('');
+  const [successModal, setSuccessModal] = useState(false);
+  const [errorModal, setErrorModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   const progressAnim = new Animated.Value(0);
+
+  const showSuccessAlert = (message) => {
+    setModalMessage(message);
+    setSuccessModal(true);
+  };
+
+  const showErrorAlert = (message) => {
+    setModalMessage(message);
+    setErrorModal(true);
+  };
 
   const evaluatePasswordStrength = (password) => {
     let score = 0;
@@ -48,7 +62,6 @@ export default function RegisterScreen({ navigation }) {
     if (/[a-z]/.test(password)) score++;
     if (/[0-9]/.test(password)) score++;
     if (/[^A-Za-z0-9]/.test(password)) score++;
-
 
     const level = score / 5;
     setPasswordStrength(level);
@@ -67,27 +80,31 @@ export default function RegisterScreen({ navigation }) {
   const handleRegister = async () => {
     try {
       if (!form.firstName || !form.userName || !form.password) {
-        Alert.alert('Error', 'Please fill all required fields.');
+        showErrorAlert('Please fill all required fields.');
         return;
       }
 
       if (passwordStrength < 0.6) {
-        Alert.alert('Weak Password', 'Please create a stronger password.');
+        showErrorAlert('Please create a stronger password. Your password should include uppercase letters, lowercase letters, numbers, and special characters.');
         return;
       }
 
       if (form.password !== form.confirmPassword) {
-        Alert.alert('Error', 'Passwords do not match.');
+        showErrorAlert('Passwords do not match. Please make sure both passwords are identical.');
         return;
       }
 
       await saveUser(form);
-      Alert.alert('Success', 'Account created successfully!');
-      navigation.replace('Login');
+      showSuccessAlert('Account created successfully!');
     } catch (error) {
       console.error('Register failed', error);
-      Alert.alert('Error', 'Failed to register user.');
+      showErrorAlert('Failed to register user. Please try again.');
     }
+  };
+
+  const handleSuccessContinue = () => {
+    setSuccessModal(false);
+    navigation.replace('Login');
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -110,10 +127,8 @@ export default function RegisterScreen({ navigation }) {
         isMuted
       />
 
-    
       <View style={styles.overlay} />
 
-    
       <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
 
       <ScrollView contentContainerStyle={styles.innerContainer}>
@@ -121,7 +136,6 @@ export default function RegisterScreen({ navigation }) {
 
         <AvatarPicker onPick={(uri) => setForm({ ...form, photoUri: uri })} />
 
-      
         <View style={styles.row}>
           <TextInput
             placeholder="First Name"
@@ -218,7 +232,6 @@ export default function RegisterScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-      
         {form.password.length > 0 && (
           <View style={styles.strengthContainer}>
             <View style={styles.strengthBarBackground}>
@@ -255,7 +268,6 @@ export default function RegisterScreen({ navigation }) {
           </View>
         )}
 
- 
         <View style={styles.passwordContainer}>
           <TextInput
             placeholder="Re-enter password"
@@ -276,11 +288,9 @@ export default function RegisterScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-    
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
-
 
         <View style={styles.bottomTextContainer}>
           <Text style={styles.bottomText}>Already have an account?</Text>
@@ -289,6 +299,76 @@ export default function RegisterScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Success Modal */}
+      <Modal
+        visible={successModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={handleSuccessContinue}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.successModalContainer}>
+            <View style={styles.successIconContainer}>
+              <View style={styles.successIconCircle}>
+                <Ionicons name="checkmark-circle" size={48} color="#4CD964" />
+              </View>
+            </View>
+            
+            <Text style={styles.successModalTitle}>
+              Welcome !
+            </Text>
+            
+            <Text style={styles.successModalMessage}>
+              {modalMessage}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.successModalButton}
+              onPress={handleSuccessContinue}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.successModalButtonText}>Continue to Login</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        visible={errorModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={() => setErrorModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.errorModalContainer}>
+            <View style={styles.errorIconContainer}>
+              <View style={styles.errorIconCircle}>
+                <Ionicons name="alert-circle" size={48} color="#FF3B30" />
+              </View>
+            </View>
+            
+            <Text style={styles.errorModalTitle}>
+              Registration Failed
+            </Text>
+            
+            <Text style={styles.errorModalMessage}>
+              {modalMessage}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.errorModalButton}
+              onPress={() => setErrorModal(false)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.errorModalButtonText}>Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -373,4 +453,129 @@ const styles = StyleSheet.create({
   bottomTextContainer: { flexDirection: 'row', marginTop: 25, marginBottom: 40 },
   bottomText: { color: '#eee', fontSize: 15 },
   loginLink: { color: '#FFD700', fontWeight: '600', fontSize: 15 },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  
+  // Success Modal Styles
+  successModalContainer: {
+    width: '85%',
+    backgroundColor: '#1C1C1E',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(76, 217, 100, 0.2)',
+  },
+  successIconContainer: {
+    marginBottom: 16,
+  },
+  successIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(76, 217, 100, 0.1)',
+    borderWidth: 2,
+    borderColor: 'rgba(76, 217, 100, 0.3)',
+  },
+  successModalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+    color: '#FFFFFF',
+  },
+  successModalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+    color: '#CCCCCC',
+  },
+  successModalButton: {
+    width: '100%',
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  successModalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+
+  // Error Modal Styles
+  errorModalContainer: {
+    width: '85%',
+    backgroundColor: '#1C1C1E',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 59, 48, 0.2)',
+  },
+  errorIconContainer: {
+    marginBottom: 16,
+  },
+  errorIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 59, 48, 0.3)',
+  },
+  errorModalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+    color: '#FFFFFF',
+  },
+  errorModalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+    color: '#CCCCCC',
+  },
+  errorModalButton: {
+    width: '100%',
+    backgroundColor: '#FF3B30',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  errorModalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
 });
