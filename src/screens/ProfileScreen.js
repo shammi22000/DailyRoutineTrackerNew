@@ -25,6 +25,9 @@ export default function ProfileScreen({ navigation }) {
   const [form, setForm] = useState({});
   const [showDate, setShowDate] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
+  const [logoutModal, setLogoutModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     loadUserData();
@@ -41,16 +44,18 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
+  const showSuccessAlert = (message) => {
+    setSuccessMessage(message);
+    setSuccessModal(true);
+  };
+
+  const showLogoutConfirmation = () => {
+    setLogoutModal(true);
+  };
+
   const handleLogout = async () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        onPress: async () => {
-          navigation.replace('Login');
-        },
-      },
-    ]);
+    setLogoutModal(false);
+    navigation.replace('Login');
   };
 
   const handleEdit = () => {
@@ -78,7 +83,7 @@ export default function ProfileScreen({ navigation }) {
       await saveUser({ ...form, id: user.id });
       setUser({ ...form, id: user.id });
       setEditModal(false);
-      Alert.alert('Success', 'Profile updated successfully.');
+      showSuccessAlert('Profile updated successfully!');
     } catch (e) {
       console.error('Error saving user:', e);
       Alert.alert('Error', 'Failed to update profile.');
@@ -142,7 +147,7 @@ export default function ProfileScreen({ navigation }) {
      
       <TouchableOpacity
         style={[styles.logoutButton, { backgroundColor: colors.primary }]}
-        onPress={handleLogout}
+        onPress={showLogoutConfirmation}
       >
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
@@ -248,6 +253,87 @@ export default function ProfileScreen({ navigation }) {
           </View>
         </View>
       </Modal>
+
+      {/* Success Modal */}
+      <Modal
+        visible={successModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={() => setSuccessModal(false)}
+      >
+        <View style={styles.successModalOverlay}>
+          <View style={[styles.successModalContainer, { backgroundColor: colors.card }]}>
+            <View style={styles.successIconContainer}>
+              <View style={[styles.successIconCircle, { backgroundColor: 'rgba(76, 217, 100, 0.1)' }]}>
+                <Ionicons name="checkmark-circle" size={48} color="#4CD964" />
+              </View>
+            </View>
+            
+            <Text style={[styles.successModalTitle, { color: colors.text }]}>
+              Success!
+            </Text>
+            
+            <Text style={[styles.successModalMessage, { color: colors.subtext }]}>
+              {successMessage}
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.successModalButton, { backgroundColor: colors.primary }]}
+              onPress={() => setSuccessModal(false)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.successModalButtonText}>Continue</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        visible={logoutModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={() => setLogoutModal(false)}
+      >
+        <View style={styles.logoutModalOverlay}>
+          <View style={[styles.logoutModalContainer, { backgroundColor: colors.card }]}>
+            <View style={styles.logoutIconContainer}>
+              <View style={[styles.logoutIconCircle, { backgroundColor: 'rgba(255, 149, 0, 0.1)' }]}>
+                <Ionicons name="log-out-outline" size={48} color="#FF9500" />
+              </View>
+            </View>
+            
+            <Text style={[styles.logoutModalTitle, { color: colors.text }]}>
+              Logout?
+            </Text>
+            
+            <Text style={[styles.logoutModalMessage, { color: colors.subtext }]}>
+              Are you sure you want to logout?{'\n'}
+            </Text>
+
+            <View style={styles.logoutModalButtonsContainer}>
+              <TouchableOpacity
+                style={[styles.logoutModalButton, styles.logoutCancelButton]}
+                onPress={() => setLogoutModal(false)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.logoutCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.logoutModalButton, styles.logoutConfirmButton]}
+                onPress={handleLogout}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="log-out-outline" size={18} color="#fff" />
+                <Text style={styles.logoutConfirmButtonText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -316,4 +402,141 @@ const styles = StyleSheet.create({
   saveBtn: { flex: 1, marginHorizontal: 5, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
   saveText: { color: '#fff', fontWeight: '600', fontSize: 16 },
   editAvatar: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#ccc' },
+  
+  // Success Modal Styles
+  successModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  successModalContainer: {
+    width: '85%',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  successIconContainer: {
+    marginBottom: 16,
+  },
+  successIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(76, 217, 100, 0.2)',
+  },
+  successModalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  successModalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  successModalButton: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  successModalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+
+  // Logout Modal Styles
+  logoutModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  logoutModalContainer: {
+    width: '85%',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  logoutIconContainer: {
+    marginBottom: 16,
+  },
+  logoutIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 149, 0, 0.2)',
+  },
+  logoutModalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  logoutModalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  logoutModalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 12,
+  },
+  logoutModalButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    gap: 8,
+  },
+  logoutCancelButton: {
+    backgroundColor: 'rgba(120, 120, 128, 0.08)',
+  },
+  logoutConfirmButton: {
+    backgroundColor: '#FF9500',
+  },
+  logoutCancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#007AFF',
+  },
+  logoutConfirmButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
 });
