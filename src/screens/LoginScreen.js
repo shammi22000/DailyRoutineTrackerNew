@@ -7,6 +7,7 @@ import {
   Alert,
   StyleSheet,
   Image,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getDB } from '../db/sqlite';
@@ -17,6 +18,21 @@ export default function LoginScreen({ navigation }) {
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
+  const [errorModal, setErrorModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [userData, setUserData] = useState(null);
+
+  const showSuccessAlert = (message, user) => {
+    setModalMessage(message);
+    setUserData(user);
+    setSuccessModal(true);
+  };
+
+  const showErrorAlert = (message) => {
+    setModalMessage(message);
+    setErrorModal(true);
+  };
 
   const handleLogin = async () => {
     try {
@@ -27,15 +43,19 @@ export default function LoginScreen({ navigation }) {
       );
 
       if (result) {
-        Alert.alert('Login Success', `Welcome ${result.firstName}`);
-        navigation.replace('Main', { screen: 'Home', params: { user: result } });
+        showSuccessAlert(`Welcome ${result.firstName}!`, result);
       } else {
-        Alert.alert('Error', 'Invalid username or password');
+        showErrorAlert('Invalid username or password');
       }
     } catch (err) {
       console.error('Login error', err);
-      Alert.alert('Error', 'Failed to login');
+      showErrorAlert('Failed to login. Please try again.');
     }
+  };
+
+  const handleSuccessContinue = () => {
+    setSuccessModal(false);
+    navigation.replace('Main', { screen: 'Home', params: { user: userData } });
   };
 
   return (
@@ -50,14 +70,11 @@ export default function LoginScreen({ navigation }) {
         isMuted
       />
 
-
       <View style={styles.overlay} />
-
 
       <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
 
       <View style={styles.innerContainer}>
-
         <View style={styles.gifContainer}>
           <Image
             source={require('../../assets/login_users.gif')}
@@ -69,7 +86,6 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.title}>Welcome Back</Text>
 
         <View style={styles.inputContainer}>
-   
           <TextInput
             placeholder="Username or Email"
             style={styles.input}
@@ -109,12 +125,82 @@ export default function LoginScreen({ navigation }) {
         </View>
 
         <View style={styles.bottomTextContainer}>
-          <Text style={styles.bottomText}>Don’t have an account?</Text>
+          <Text style={styles.bottomText}>Don't have an account?</Text>
           <TouchableOpacity onPress={() => navigation.replace('Register')}>
             <Text style={styles.signUpLink}> Sign up</Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Success Modal */}
+      <Modal
+        visible={successModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={handleSuccessContinue}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.successModalContainer}>
+            <View style={styles.successIconContainer}>
+              <View style={styles.successIconCircle}>
+                <Ionicons name="checkmark-circle" size={48} color="#4CD964" />
+              </View>
+            </View>
+            
+            <Text style={styles.successModalTitle}>
+              Login Success!
+            </Text>
+            
+            <Text style={styles.successModalMessage}>
+              {modalMessage}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.successModalButton}
+              onPress={handleSuccessContinue}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.successModalButtonText}>Continue</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        visible={errorModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={() => setErrorModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.errorModalContainer}>
+            <View style={styles.errorIconContainer}>
+              <View style={styles.errorIconCircle}>
+                <Ionicons name="alert-circle" size={48} color="#FF3B30" />
+              </View>
+            </View>
+            
+            <Text style={styles.errorModalTitle}>
+              Login Failed
+            </Text>
+            
+            <Text style={styles.errorModalMessage}>
+              {modalMessage}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.errorModalButton}
+              onPress={() => setErrorModal(false)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.errorModalButtonText}>Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -126,7 +212,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.6)', //video eke darkness eka
+    backgroundColor: 'rgba(0,0,0,0.6)',
   },
   innerContainer: {
     flex: 1,
@@ -216,5 +302,130 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     fontWeight: '600',
     fontSize: 15,
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  
+  // Success Modal Styles
+  successModalContainer: {
+    width: '85%',
+    backgroundColor: '#1C1C1E',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(76, 217, 100, 0.2)',
+  },
+  successIconContainer: {
+    marginBottom: 16,
+  },
+  successIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(76, 217, 100, 0.1)',
+    borderWidth: 2,
+    borderColor: 'rgba(76, 217, 100, 0.3)',
+  },
+  successModalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+    color: '#FFFFFF',
+  },
+  successModalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+    color: '#CCCCCC',
+  },
+  successModalButton: {
+    width: '100%',
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  successModalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+
+  // Error Modal Styles
+  errorModalContainer: {
+    width: '85%',
+    backgroundColor: '#1C1C1E',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 59, 48, 0.2)',
+  },
+  errorIconContainer: {
+    marginBottom: 16,
+  },
+  errorIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 59, 48, 0.3)',
+  },
+  errorModalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+    color: '#FFFFFF',
+  },
+  errorModalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+    color: '#CCCCCC',
+  },
+  errorModalButton: {
+    width: '100%',
+    backgroundColor: '#FF3B30',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  errorModalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });
