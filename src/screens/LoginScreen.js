@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 
-  // Error Modal Styles
+  // Error Modal Styles.
   errorModalContainer: {
     width: '85%',
     backgroundColor: '#1C1C1E',
