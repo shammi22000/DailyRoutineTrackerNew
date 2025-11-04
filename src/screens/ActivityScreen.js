@@ -50,6 +50,9 @@ export default function ActivityScreen({ route, navigation }) {
   const [categories, setCategories] = useState([]);
   const [activityModal, setActivityModal] = useState(false);
   const [categoryModal, setCategoryModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(null);
+  const [deleteType, setDeleteType] = useState("");
   const [editing, setEditing] = useState(null);
   const [formActivity, setFormActivity] = useState(emptyActivity());
   const [formCategory, setFormCategory] = useState(emptyCategory());
@@ -59,6 +62,7 @@ export default function ActivityScreen({ route, navigation }) {
   const mounted = useRef(true);
   const activityAnim = useRef(new Animated.Value(0)).current;
   const categoryAnim = useRef(new Animated.Value(0)).current;
+  const deleteAnim = useRef(new Animated.Value(0)).current;
 
   function emptyActivity() {
     return {
@@ -211,22 +215,35 @@ export default function ActivityScreen({ route, navigation }) {
     Animated.timing(activityAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
   }
 
-  async function onDeleteActivity(id) {
-    Alert.alert("Confirm", "Delete this activity?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteActivity(id);
-            await reloadAll();
-          } catch (e) {
-            console.error("deleteActivity error", e);
-          }
-        },
-      },
-    ]);
+  function showDeleteConfirmation(item, type) {
+    setDeleteItem(item);
+    setDeleteType(type);
+    setDeleteModal(true);
+    deleteAnim.setValue(0);
+    Animated.timing(deleteAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+  }
+
+  async function confirmDelete() {
+    try {
+      if (deleteType === "activity") {
+        await deleteActivity(deleteItem.id);
+      } else {
+        await deleteCategory(deleteItem.id);
+      }
+      await reloadAll();
+      closeDeleteModal();
+    } catch (e) {
+      console.error("delete error", e);
+      Alert.alert("Error", "Failed to delete item.");
+    }
+  }
+
+  function closeDeleteModal() {
+    Animated.timing(deleteAnim, { toValue: 0, duration: 180, useNativeDriver: true }).start(() => {
+      setDeleteModal(false);
+      setDeleteItem(null);
+      setDeleteType("");
+    });
   }
 
   async function onSaveCategory() {
@@ -261,24 +278,6 @@ export default function ActivityScreen({ route, navigation }) {
     });
     setCategoryModal(true);
     Animated.timing(categoryAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
-  }
-
-  async function onDeleteCategory(id) {
-    Alert.alert("Confirm", "Delete this category?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteCategory(id);
-            await reloadAll();
-          } catch (e) {
-            console.error("deleteCategory error", e);
-          }
-        },
-      },
-    ]);
   }
 
   const onDateChange = (_, d) => {
@@ -337,7 +336,7 @@ export default function ActivityScreen({ route, navigation }) {
         <TouchableOpacity onPress={() => onEditActivity(item)}>
           <Ionicons name="create-outline" size={22} color="#007AFF" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => onDeleteActivity(item.id)}>
+        <TouchableOpacity onPress={() => showDeleteConfirmation(item, "activity")}>
           <Ionicons name="trash-outline" size={22} color="#FF3B30" />
         </TouchableOpacity>
       </View>
@@ -383,7 +382,7 @@ export default function ActivityScreen({ route, navigation }) {
         <TouchableOpacity onPress={() => onEditCategory(item)}>
           <Ionicons name="create-outline" size={22} color="#007AFF" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => onDeleteCategory(item.id)}>
+        <TouchableOpacity onPress={() => showDeleteConfirmation(item, "category")}>
           <Ionicons name="trash-outline" size={22} color="#FF3B30" />
         </TouchableOpacity>
       </View>
@@ -523,6 +522,7 @@ export default function ActivityScreen({ route, navigation }) {
         </>
       )}
 
+      {/* Activity Modal */}
       <Modal
         transparent
         visible={activityModal}
@@ -733,6 +733,7 @@ export default function ActivityScreen({ route, navigation }) {
         </BlurView>
       </Modal>
 
+      {/* Category Modal */}
       <Modal
         transparent
         visible={categoryModal}
@@ -864,6 +865,95 @@ export default function ActivityScreen({ route, navigation }) {
           </Animated.View>
         </BlurView>
       </Modal>
+
+  
+      <Modal
+        transparent
+        visible={deleteModal}
+        animationType="none"
+        onRequestClose={closeDeleteModal}
+      >
+        <BlurView intensity={80} tint={theme === "dark" ? "dark" : "light"} style={StyleSheet.absoluteFill}>
+          <Animated.View
+            style={[
+              styles.modalOverlay,
+              {
+                opacity: deleteAnim,
+                transform: [
+                  {
+                    scale: deleteAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8, 1],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.deleteModalContainer,
+                { backgroundColor: theme === "dark" ? "#1a1a1a" : "#fff" },
+              ]}
+            >
+              <View style={styles.deleteIconContainer}>
+                <View style={styles.deleteIconCircle}>
+                  <Ionicons name="trash-outline" size={32} color="#FF3B30" />
+                </View>
+              </View>
+
+              <Text
+                style={[
+                  styles.deleteTitle,
+                  { color: theme === "dark" ? "#fff" : "#000" },
+                ]}
+              >
+                Delete {deleteType === "activity" ? "Activity" : "Category"}
+              </Text>
+
+              <Text
+                style={[
+                  styles.deleteMessage,
+                  { color: theme === "dark" ? "#ccc" : "#666" },
+                ]}
+              >
+                Are you sure you want to delete{" "}
+                <Text style={styles.deleteItemName}>"{deleteItem?.name}"</Text>? 
+              
+              </Text>
+
+              <View style={styles.deleteButtonsContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.deleteButton,
+                    styles.deleteCancelButton,
+                    { backgroundColor: theme === "dark" ? "#333" : "#f0f0f0" },
+                  ]}
+                  onPress={closeDeleteModal}
+                >
+                  <Text
+                    style={[
+                      styles.deleteButtonText,
+                      styles.deleteCancelText,
+                      { color: theme === "dark" ? "#fff" : "#000" },
+                    ]}
+                  >
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.deleteButton, styles.deleteConfirmButton]}
+                  onPress={confirmDelete}
+                >
+                  <Ionicons name="trash" size={18} color="#fff" />
+                  <Text style={styles.deleteConfirmText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Animated.View>
+        </BlurView>
+      </Modal>
     </View>
   );
 }
@@ -981,4 +1071,83 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dropdownSelected: { backgroundColor: "#007AFF" },
+  
+  
+  deleteModalContainer: {
+    width: "85%",
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  deleteIconContainer: {
+    marginBottom: 16,
+  },
+  deleteIconCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "rgba(255, 59, 48, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "rgba(255, 59, 48, 0.2)",
+  },
+  deleteTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  deleteMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  deleteItemName: {
+    fontWeight: "700",
+    color: "#FF3B30",
+  },
+  deleteButtonsContainer: {
+    flexDirection: "row",
+    width: "100%",
+    gap: 12,
+  },
+  deleteButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  deleteCancelButton: {
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  deleteConfirmButton: {
+    backgroundColor: "#FF3B30",
+    shadowColor: "#FF3B30",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  deleteCancelText: {
+    color: "#666",
+  },
+  deleteConfirmText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
 });
