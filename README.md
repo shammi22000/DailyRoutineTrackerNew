@@ -86,10 +86,11 @@ npx expo run:android
 ## 🧠 Usage
 
 1. Register and log in.  
-2. Add new daily activities with date and time.  
-3. Receive notifications at scheduled times.  
-4. View past records and progress graphs.  
-5. Log out securely to clear session data.
+2. Add new daily activities with date and time.
+3. Add new activity category 
+4. Receive notifications at scheduled times.  
+5. View past records and progress graphs.  
+6. Log out securely to clear session data.
 
 
 ## 🧰 Tools
