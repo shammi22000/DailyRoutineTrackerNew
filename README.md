@@ -1,72 +1,100 @@
-**Project Title : Daily Routine Tracker**
+# 🕒 Daily Routine Tracker
 
-Daily routine tracker is a smartphone software that allows users to create, track, and enhance their daily routines and habits using a tracker, a dashboard, reports, and secure login management. 
+A cross-platform mobile app built with **React Native (Expo)** + SQLite backend** to help users plan, track, and reflect on their daily activities with reminders and statistics.
 
-The App is aimed at busy people, students, and professionals who require an easy way to organize their schedules and track the progress of their tasks. This plan describes the aim, primary features, process flow, and contains basic mockups and wireframes to show how the app should act and look. 
+---
 
-**This mobile application is built using the following technologies**
+## 🚀 Features
 
-**React Native**
+- 📋 Add, edit, and delete daily routines  
+- 🔔 Local notifications for reminders (Expo Notifications)  
+- 📅 Date-wise activity tracking  
+- 📊 Progress statistics and summaries  
+- 💾 Offline data storage with **SQLite**  
+- 🔐 User login and logout functionality  
+- 🌓 Light/Dark mode support  
 
-  Framework for building cross-platform mobile apps 
+---
 
-**React Navigation**
+## 🏗️ Tech Stack
 
-  Used for screen navigation between pages like Login, Signup, and Home.
+### Frontend
+- **React Native (Expo SDK 53+)**
+- **SQLite** for local storage  
+- **Expo Notifications** for reminders  
+- **React Navigation** for screen management  
 
-**AsyncStorage (or SecureStore)**
+---
 
-  Used for local storage of user data, such as login tokens or preferences, on the device.
+## 📁 Folder Structure
 
+```
+DailyRoutineTracker/
+│
+├── backend/
+│   ├── server.js
+│   ├── routes/
+│   ├── controllers/
+│   ├── models/
+│   └── db/
+│
+├── frontend/
+│   ├── App.js
+│   ├── screens/
+│   │   ├── ActivityScreen.js
+│   │   ├── LoginScreen.js
+│   │   ├── RegisterScreen.js
+│   │   ├── HomeScreen.js
+│   │   ├── SettingsScreen.js
+│   │   ├── ProfileScreen.js
+│   ├── components/
+│   ├── database/
+│   │   └── database.js
+│   ├── assets/
+│   └── utils/
+│
+└── README.md
+```
 
-**Fetch API (or Axios)**
+---
 
-  Used to make API requests to backend services for login, signup, or tracking data.
+## ⚙️ Installation
 
+### 1. Clone Repository
+```bash
+git clone https://github.com/shammi22000/DailyRoutineTrackerNew.git
+```
 
-**JavaScript** 
-
-  The main programming language for app logic, validation, and API communication.
-
-
-
-**StyleSheet (React Native)**
-
-  Used for styling the app UI — defines colors, spacing, typography, and layout.
-
-
-
-
-**Key features**
-
-**Login module** 
-
-      User registration and login
-
-      View and update user profile
-
-
-**Daily Activity Tracker module**
-
-    Create activities (title, duration, description etc …….)
-
-    Set Activity status (completed, progress, overdue)
-
-    View all daily activities in an organized list
-
-    Edit existing activity details such as name, time, or duration.
-
-    Check-off completion 
-
-    Display activity detail daily, weekly based on the requirement
+---
 
 
-**Dashboard**
+## 📱 Building APK (Android)
 
-    Today’s summary: use charts to display the summery graphically
+```bash
+npx expo build:android
+```
 
-    Weekly summery of the activity status 
+For re-builds:
+```bash
+npx expo run:android
+```
 
-**Basic settings**
+> Use a **development build** instead of Expo Go for push notifications (SDK 53+).
 
-    notifications for upcoming activities before a certain time
+---
+
+## 🧠 Usage
+
+1. Register and log in.  
+2. Add new daily activities with date and time.  
+3. Receive notifications at scheduled times.  
+4. View past records and progress graphs.  
+5. Log out securely to clear session data.
+
+
+## 🧰 Tools
+
+- Visual Studio Code  
+- Expo CLI  
+- Git
+- Android Studio (for emulator/testing)
